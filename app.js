@@ -1,4 +1,7 @@
-const express = require("express");
+import { Server, Socket } from "socket.io";
+
+import express from "express";
+// const express = require("express");
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -66,3 +69,32 @@ const html = `
   </body>
 </html>
 `
+
+// socket for audio streaming
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("offer", (data) => {
+      socket.broadcast.emit("offer", data);
+  });
+
+  socket.on("answer", (data) => {
+      socket.broadcast.emit("answer", data);
+  });
+
+  socket.on("ice-candidate", (data) => {
+      socket.broadcast.emit("ice-candidate", data);
+  });
+
+  socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+  });
+});
